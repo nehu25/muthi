@@ -1,1 +1,10 @@
-
+{
+  "settings": {
+    "websiteName": "",
+    "landingImage": "",
+    "facebookSubscription": "",
+    "socialBarScript": "",
+    "stickyBannerScript": ""
+  },
+  "posts": []
+}
