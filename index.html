@@ -116,26 +116,23 @@
       user-select: none;
     }
 
-    /* Character image – Layer 2 */
+    /* MOBILE FIRST - Character Image */
     #landing-character {
       position: absolute;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: min(420px, 90vw);
-      height: auto;
-      max-height: 85dvh;
-      object-fit: contain;
-      object-position: bottom;
+      width: 100%;
+      height: 95dvh; /* Cover interface, leave slight negative space top */
+      object-fit: cover;
+      object-position: bottom center;
       z-index: 2;
       pointer-events: none;
-      /* fade-in on load */
       opacity: 0;
       transition: opacity 0.6s ease;
     }
     #landing-character.loaded { opacity: 1; }
 
-    /* Character placeholder when no image */
     #landing-character-placeholder {
       position: absolute;
       bottom: 0;
@@ -150,7 +147,7 @@
       justify-content: center;
     }
 
-    /* Buttons wrapper – Layer 3 */
+    /* MOBILE FIRST - Buttons Wrapper */
     #landing-buttons {
       position: absolute;
       top: 50%;
@@ -164,7 +161,45 @@
       align-items: center;
     }
 
-    /* Target Image1 Transparent Glass Grey Style */
+    /* RESPONSIVE: LAPTOP & TABLET */
+    @media (min-width: 768px) {
+      #view-landing {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 8vw;
+        padding: 0 5vw;
+      }
+      
+      #landing-character {
+        position: relative;
+        left: auto;
+        bottom: auto;
+        transform: none;
+        order: 2; /* Force image to the right */
+        height: 85dvh;
+        width: 40vw; /* Keep proper ratio spacing */
+        max-width: 500px;
+        aspect-ratio: 9/16;
+        object-fit: contain; /* Prevents cropping on wide screens */
+      }
+      
+      #landing-buttons {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        order: 1; /* Force buttons to the left */
+        width: 340px; /* Cap width to prevent massive buttons */
+      }
+      
+      #landing-character-placeholder {
+        display: none !important;
+      }
+    }
+
+    /* Transparent Glass Grey Style Buttons */
     .landing-btn {
       width: 100%;
       padding: 16px 20px;
@@ -716,7 +751,7 @@
     .empty-state p { color: var(--clr-text-muted); font-size: 0.95rem; }
 
     /* ═══════════════════════════════════════════════════════════════════════
-       AD CONTAINER (isolated)
+       AD CONTAINER (Centering Override Applied)
     ═══════════════════════════════════════════════════════════════════════ */
     #ad-layer {
       position: fixed;
@@ -725,8 +760,18 @@
       right: 0;
       z-index: 500;
       pointer-events: none;
+      display: flex;             /* Centering logic */
+      justify-content: center;   /* Horizontal center */
+      align-items: flex-end;     /* Align to bottom edge */
+      width: 100vw;
     }
-    #ad-layer * { pointer-events: auto; }
+    #ad-layer > * { 
+      pointer-events: auto;
+      position: relative !important; /* Overrides left alignment injections */
+      left: auto !important;
+      right: auto !important;
+      margin: 0 auto !important; /* Force true centering */
+    }
 
     /* ═══════════════════════════════════════════════════════════════════════
        MISC
@@ -848,7 +893,7 @@
         ▶ Watch Video
       </button>
       <button class="btn-watch-video" id="btn-watch-video" disabled>
-        Watch Content
+        🔓 Watch Content
       </button>
     </div>
 
@@ -908,22 +953,27 @@
 
 // ─── SVG LOGO MARKUP ────────────────────────────────────────────────────────
 const LOGO_SVG_INNER = `
-  <!-- Stick (cylinder top wider) -->
-  <rect x="24" y="22" width="12" height="26" rx="5" fill="#111"/>
-  <ellipse cx="30" cy="22" rx="8" ry="4" fill="#1a1a1a"/>
-  <ellipse cx="30" cy="48" rx="6" ry="3" fill="#0d0d0d"/>
-  <!-- Fist body (Skin color) -->
-  <rect x="14" y="36" width="32" height="26" rx="8" fill="#d2996c"/>
-  <!-- Finger knuckle rows (Darker skin color) -->
-  <rect x="14" y="36" width="32" height="10" rx="5" fill="#b87a50"/>
-  <!-- Thumb (Skin color) -->
-  <ellipse cx="14" cy="46" rx="5" ry="8" fill="#d2996c"/>
+  <!-- Stick (Tanned skin color) -->
+  <path d="M22 20 L22 62 A8 4 0 0 0 38 62 L38 20 Z" fill="#d09a72"/>
+  <ellipse cx="30" cy="20" rx="8" ry="4" fill="#e4ba9a"/>
+  
+  <!-- Hand Palm Base -->
+  <rect x="12" y="32" width="10" height="32" rx="4" fill="#a46039"/>
+  
+  <!-- 4 Fingers overlapping the stick (Clearly distinct, naturally folding) -->
+  <rect x="16" y="32" width="28" height="7.5" rx="3.75" fill="#c2774a" stroke="#8b4a28" stroke-width="1.2"/>
+  <rect x="16" y="40" width="28" height="7.5" rx="3.75" fill="#c2774a" stroke="#8b4a28" stroke-width="1.2"/>
+  <rect x="16" y="48" width="28" height="7.5" rx="3.75" fill="#c2774a" stroke="#8b4a28" stroke-width="1.2"/>
+  <rect x="16" y="56" width="28" height="7.5" rx="3.75" fill="#c2774a" stroke="#8b4a28" stroke-width="1.2"/>
+  
+  <!-- Thumb overlapping (Natural crossing angle) -->
+  <rect x="10" y="32" width="9" height="20" rx="4.5" transform="rotate(-25 14 42)" fill="#c2774a" stroke="#8b4a28" stroke-width="1.2"/>
+  
   <!-- White liquid drops -->
-  <ellipse cx="26" cy="10" rx="3.5" ry="5.5" fill="white" opacity="0.92"/>
-  <ellipse cx="30" cy="6" rx="2.5" ry="4.5" fill="white" opacity="0.78"/>
-  <ellipse cx="34" cy="10" rx="3" ry="5" fill="white" opacity="0.85"/>
-  <!-- Drop shine -->
-  <ellipse cx="25.2" cy="8" rx="1" ry="2" fill="white" opacity="0.5"/>
+  <ellipse cx="27" cy="10" rx="3.5" ry="5.5" fill="white" opacity="0.92"/>
+  <ellipse cx="32" cy="6" rx="2.5" ry="4.5" fill="white" opacity="0.78"/>
+  <ellipse cx="36" cy="11" rx="3" ry="5" fill="white" opacity="0.85"/>
+  <ellipse cx="26.2" cy="8" rx="1" ry="2" fill="white" opacity="0.5"/>
 `;
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
