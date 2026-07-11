@@ -131,7 +131,6 @@
       object-position: bottom center;
       z-index: 2;
       pointer-events: none;
-      /* Removed opacity delay to instantly display the image once downloaded */
     }
 
     #landing-character-placeholder {
@@ -164,14 +163,8 @@
 
     /* RESPONSIVE: LAPTOP & TABLET */
     @media (min-width: 768px) {
-      /* Added .active to prevent desktop flex from overriding display:none */
       #view-landing.active {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 8vw;
-        padding: 0 5vw;
+        display: block; /* Ensure it stays a block element for absolute positioning */
       }
       
       #view-landing:not(.active) {
@@ -179,25 +172,22 @@
       }
       
       #landing-character {
-        position: relative;
         left: auto;
-        bottom: auto;
+        right: 0;       /* Stick entirely to the right border */
+        bottom: 0;      /* Stick entirely to the bottom border */
         transform: none;
-        order: 2; /* Force image to the right */
-        height: 85dvh;
-        width: 40vw; /* Keep proper ratio spacing */
-        max-width: 500px;
-        aspect-ratio: 9/16;
-        object-fit: contain; /* Prevents cropping on wide screens */
+        height: 95dvh;
+        width: 50vw;    /* Take up half the screen max */
+        max-width: 600px;
+        object-fit: contain;
+        object-position: bottom right; /* Overlaps bottom and right boundaries perfectly */
       }
       
       #landing-buttons {
-        position: relative;
-        top: auto;
-        left: auto;
-        transform: none;
-        order: 1; /* Force buttons to the left */
-        width: 340px; /* Cap width to prevent massive buttons */
+        left: 25%;      /* Centered on the left half */
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 340px;   /* Cap width to prevent massive buttons */
       }
       
       #landing-character-placeholder {
@@ -899,7 +889,7 @@
         ▶ Watch Video
       </button>
       <button class="btn-watch-video" id="btn-watch-video" disabled>
-        🔓 Watch Content
+        Watch Content
       </button>
     </div>
 
@@ -965,9 +955,8 @@ const initialDataFetch = fetch(DATA_URL, { cache: 'force-cache' })
 
 // ─── SVG LOGO MARKUP ────────────────────────────────────────────────────────
 const LOGO_SVG_INNER = `
-  <!-- Stick (Tanned skin color) -->
-  <path d="M22 20 L22 62 A8 4 0 0 0 38 62 L38 20 Z" fill="#d09a72"/>
-  <ellipse cx="30" cy="20" rx="8" ry="4" fill="#e4ba9a"/>
+  <!-- Stick (Tapered, rounded top, Tanned skin color) -->
+  <path d="M 18 25 A 12 12 0 0 1 42 25 L 34 62 A 4 4 0 0 1 26 62 Z" fill="#d09a72"/>
   
   <!-- Hand Palm Base -->
   <rect x="12" y="32" width="10" height="32" rx="4" fill="#a46039"/>
@@ -980,12 +969,6 @@ const LOGO_SVG_INNER = `
   
   <!-- Thumb overlapping (Natural crossing angle) -->
   <rect x="10" y="32" width="9" height="20" rx="4.5" transform="rotate(-25 14 42)" fill="#c2774a" stroke="#8b4a28" stroke-width="1.2"/>
-  
-  <!-- White liquid drops -->
-  <ellipse cx="27" cy="10" rx="3.5" ry="5.5" fill="white" opacity="0.92"/>
-  <ellipse cx="32" cy="6" rx="2.5" ry="4.5" fill="white" opacity="0.78"/>
-  <ellipse cx="36" cy="11" rx="3" ry="5" fill="white" opacity="0.85"/>
-  <ellipse cx="26.2" cy="8" rx="1" ry="2" fill="white" opacity="0.5"/>
 `;
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
