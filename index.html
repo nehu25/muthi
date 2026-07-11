@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Moothi</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Moothi – Watch free and exclusive video content." />
+  <meta name="theme-color" content="#90003a" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Moothi" />
+  <meta property="og:description" content="Watch free and exclusive video content on Moothi." />
+  <meta property="og:image" content="" />
+  <meta property="og:url" content="" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Moothi" />
+  <meta name="twitter:description" content="Watch free and exclusive video content on Moothi." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --clr-bg: #000;
+      --clr-surface: #111;
+      --clr-border: rgba(255,255,255,0.08);
+      --clr-text: #f0f0f0;
+      --clr-text-muted: #888;
+      --clr-accent: #d4006c;
+      --clr-accent2: #6c00d4;
+      --clr-unlock: #00e676;
+      --radius-card: 16px;
+      --header-h: 60px;
+      --transition: 0.3s cubic-bezier(.4,0,.2,1);
+      --shadow-glass: 0 8px 32px rgba(0,0,0,0.6);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--clr-bg);
+      color: var(--clr-text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SCROLLBAR ────────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--clr-accent); border-radius: 4px; }
+
+    /* ─── VIEWS ────────────────────────────────────────────────────────────── */
+    .view { display: none; min-height: 100dvh; }
+    .view.active { display: block; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       LANDING PAGE
+    ═══════════════════════════════════════════════════════════════════════ */
+    #view-landing {
+      position: relative;
+      min-height: 100dvh;
+      background: linear-gradient(135deg, #90003a 0%, #1a0033 100%);
+      overflow: hidden;
+    }
+
+    /* Neon center glow – Layer 1 */
+    #view-landing::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 60%, rgba(0,255,200,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(0,180,255,0.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Noise texture overlay */
+    #view-landing::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    /* Top-left brand name */
+    #landing-brand {
+      position: absolute;
+      top: 20px;
+      left: 22px;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+      z-index: 10;
+      user-select: none;
+    }
+
+    /* Character image – Layer 2 */
+    #landing-character {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(420px, 90vw);
+      height: auto;
+      max-height: 85dvh;
+      object-fit: contain;
+      object-position: bottom;
+      z-index: 2;
+      pointer-events: none;
+      /* fade-in on load */
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    #landing-character.loaded { opacity: 1; }
+
+    /* Character placeholder when no image */
+    #landing-character-placeholder {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(340px, 85vw);
+      height: 65dvh;
+      z-index: 2;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    /* Buttons wrapper – Layer 3 */
+    #landing-buttons {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: min(360px, 88vw);
+      align-items: center;
+    }
+
+    /* Target Image1 Transparent Glass Grey Style */
+    .landing-btn {
+      width: 100%;
+      padding: 16px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-align: center;
+      transition: transform var(--transition), background var(--transition);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .landing-btn:hover, .landing-btn:focus { 
+      background: rgba(255, 255, 255, 0.12); 
+    }
+    .landing-btn:active { 
+      transform: scale(0.97); 
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       SHARED HEADER (Free / Exclusive / Post pages)
+    ═══════════════════════════════════════════════════════════════════════ */
+    .page-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-h);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid var(--clr-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+      gap: 12px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    
+    /* Medium Sized Logo */
+    .header-brand svg {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    
+    .header-brand-name {
+      font-family: 'Dancing Script', 'Brush Script MT', cursive;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    /* Search bar */
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 340px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--clr-text-muted);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      color: #fff;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .search-input::placeholder { color: var(--clr-text-muted); }
+    .search-input:focus {
+      border-color: rgba(212,0,108,0.6);
+      background: rgba(255,255,255,0.12);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       GRID PAGE (Free / Exclusive)
+    ═══════════════════════════════════════════════════════════════════════ */
+    .grid-page { background: #000; min-height: 100dvh; }
+
+    .page-title {
+      padding: 20px 16px 8px;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #ff6ea0, #c77dff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Info card (Exclusive) */
+    .info-card {
+      margin: 12px 16px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, rgba(212,0,108,0.15), rgba(108,0,212,0.15));
+      border: 1px solid rgba(212,0,108,0.3);
+      border-radius: var(--radius-card);
+      backdrop-filter: blur(12px);
+    }
+    .info-card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .info-card-stat {
+      font-size: 0.9rem;
+      color: var(--clr-text-muted);
+    }
+    .info-card-stat strong {
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: 800;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #d4006c, #6c00d4);
+      transition: width 0.5s ease;
+    }
+    .info-card-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      background: linear-gradient(135deg, #d4006c, #6c00d4);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .info-card-btn:hover { opacity: 0.88; transform: scale(1.02); }
+    .info-card-btn:active { transform: scale(0.97); }
+
+    /* Post grid */
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 12px 12px 100px;
+    }
+
+    @media (min-width: 480px) {
+      .post-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 768px) {
+      .post-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 16px 16px 120px; }
+    }
+    @media (min-width: 1024px) {
+      .post-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+
+    .post-card {
+      position: relative;
+      background: var(--clr-surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+      -webkit-tap-highlight-color: transparent;
+      border: 1px solid var(--clr-border);
+    }
+    .post-card:hover { transform: scale(1.03); box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
+    .post-card:active { transform: scale(0.98); }
+
+    .post-thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9/16;
+      overflow: hidden;
+      background: #1a1a1a;
+    }
+    .post-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.4s ease;
+    }
+    .post-thumb[data-src] { opacity: 0; }
+    .post-thumb.img-loaded { opacity: 1; }
+
+    /* Gradient overlay on thumb */
+    .post-thumb-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none;
+    }
+
+    .post-title {
+      padding: 8px 10px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--clr-text);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Lock overlay */
+    .lock-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      backdrop-filter: blur(4px);
+    }
+    .lock-overlay svg { width: 32px; height: 32px; color: #ffba00; }
+    .lock-msg {
+      font-size: 0.7rem;
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.4;
+    }
+
+    /* Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--radius-card);
+    }
+    .skeleton-thumb { aspect-ratio: 9/16; width: 100%; border-radius: var(--radius-card) var(--radius-card) 0 0; }
+    .skeleton-title { height: 14px; margin: 8px 10px; border-radius: 4px; }
+    .skeleton-title2 { height: 10px; margin: 4px 10px 10px; border-radius: 4px; width: 60%; }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       SINGLE POST PAGE
+    ═══════════════════════════════════════════════════════════════════════ */
+    #view-post { background: #000; min-height: 100dvh; }
+
+    .post-hero {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9/16;
+      max-height: 70dvh;
+      overflow: hidden;
+      background: #0d0d0d;
+    }
+    .post-hero-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .post-hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%, rgba(0,0,0,0.85) 100%);
+    }
+    .post-hero-title {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      font-size: clamp(1rem, 3.5vw, 1.4rem);
+      font-weight: 800;
+      line-height: 1.3;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 12px;
+      padding: 20px 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-watch-ad {
+      flex: 1;
+      min-width: 130px;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #d4006c, #9b0060);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 20px rgba(212,0,108,0.4);
+      -webkit-tap-highlight-color: transparent;
+      text-align: center;
+    }
+    .btn-watch-ad:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(212,0,108,0.5); }
+    .btn-watch-ad:active { transform: scale(0.97); }
+
+    .btn-watch-video {
+      flex: 1;
+      min-width: 130px;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #00c853, #00695c);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 20px rgba(0,200,83,0.35);
+      -webkit-tap-highlight-color: transparent;
+      text-align: center;
+    }
+    .btn-watch-video:disabled {
+      background: rgba(255,255,255,0.08);
+      color: var(--clr-text-muted);
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .btn-watch-video:not(:disabled):hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-watch-video:not(:disabled):active { transform: scale(0.97); }
+
+    /* Timer indicator */
+    .timer-indicator {
+      margin: 0 16px 16px;
+      padding: 12px 16px;
+      background: rgba(212,0,108,0.1);
+      border: 1px solid rgba(212,0,108,0.25);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #ff6ea0;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    .timer-indicator.visible { display: flex; }
+    .timer-ring {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    /* Share row */
+    .share-row {
+      display: flex;
+      gap: 10px;
+      padding: 4px 16px 20px;
+      flex-wrap: wrap;
+    }
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: var(--clr-text-muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .share-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .share-btn svg { width: 15px; height: 15px; }
+
+    /* Related reels */
+    .related-section { padding: 0 0 24px; }
+    .related-title {
+      padding: 8px 16px 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--clr-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-size: 0.78rem;
+    }
+    .related-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 0 16px 12px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .related-scroll::-webkit-scrollbar { display: none; }
+    .related-card {
+      flex: 0 0 120px;
+      scroll-snap-align: start;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform var(--transition);
+    }
+    .related-card:hover { transform: scale(1.04); }
+    .related-card:active { transform: scale(0.97); }
+    .related-card .post-thumb-wrap { border-radius: 10px; }
+    .related-card .post-title { font-size: 0.7rem; padding: 5px 2px; }
+
+    /* Prev/Next nav */
+    .post-nav {
+      display: flex;
+      gap: 12px;
+      padding: 8px 16px 100px;
+    }
+    .post-nav-btn {
+      flex: 1;
+      padding: 13px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: var(--clr-text);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background var(--transition), border-color var(--transition);
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .post-nav-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(212,0,108,0.4); }
+    .post-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(20,20,20,0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 12px 20px;
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 500;
+      z-index: 9999;
+      max-width: min(340px, 90vw);
+      text-align: center;
+      transition: transform 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s ease;
+      opacity: 0;
+      line-height: 1.4;
+      pointer-events: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #toast.toast-success { border-color: rgba(0,200,83,0.4); }
+    #toast.toast-error { border-color: rgba(212,0,108,0.5); }
+    #toast.toast-info { border-color: rgba(108,0,212,0.4); }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       PULL-TO-REFRESH
+    ═══════════════════════════════════════════════════════════════════════ */
+    .ptr-indicator {
+      position: absolute;
+      top: var(--header-h);
+      left: 50%;
+      transform: translateX(-50%) translateY(-60px);
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(212,0,108,0.4);
+      border-top-color: #d4006c;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+      z-index: 50;
+      opacity: 0;
+    }
+    .ptr-indicator.ptr-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(10px);
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: translateX(-50%) rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════════════════════════════ */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 12px;
+      text-align: center;
+    }
+    .empty-state svg { width: 60px; height: 60px; color: rgba(255,255,255,0.15); }
+    .empty-state p { color: var(--clr-text-muted); font-size: 0.95rem; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       AD CONTAINER (isolated)
+    ═══════════════════════════════════════════════════════════════════════ */
+    #ad-layer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 500;
+      pointer-events: none;
+    }
+    #ad-layer * { pointer-events: auto; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       MISC
+    ═══════════════════════════════════════════════════════════════════════ */
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    /* Scrollable page content */
+    .page-scroll { overflow-y: auto; height: calc(100dvh - var(--header-h)); position: relative; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--clr-border); margin: 0 16px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+
+  <!-- Google Fonts for cursive branding -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ─── VIEWS ──────────────────────────────────────────────────────────────── -->
+
+<!-- LANDING -->
+<div id="view-landing" class="view active" role="main" aria-label="Landing Page">
+  <span id="landing-brand">Moothi</span>
+
+  <div id="landing-character-placeholder" aria-hidden="true"></div>
+  <img id="landing-character" src="" alt="" aria-hidden="true" loading="eager" />
+
+  <div id="landing-buttons" role="navigation" aria-label="Main Navigation">
+    <button class="landing-btn" id="btn-free" aria-label="Watch Free Videos">
+      Watch Free Videos
+    </button>
+    <button class="landing-btn" id="btn-exclusive" aria-label="Watch Exclusive Content">
+      Watch My Exclusive Content
+    </button>
+  </div>
+</div>
+
+<!-- FREE VIDEOS -->
+<div id="view-free" class="view grid-page" role="main" aria-label="Free Videos">
+  <header class="page-header" id="free-header">
+    <div class="header-brand" id="free-brand-btn" role="button" tabindex="0" aria-label="Home">
+      <svg id="logo-free" viewBox="0 0 60 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+      <span class="header-brand-name">Moothi</span>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" type="search" id="free-search" placeholder="Search videos…" aria-label="Search free videos" autocomplete="off" />
+    </div>
+  </header>
+
+  <div class="page-scroll" id="free-scroll">
+    <div class="ptr-indicator" id="free-ptr" aria-hidden="true"></div>
+    <div class="post-grid" id="free-grid" role="list" aria-label="Free videos grid"></div>
+    <div id="free-sentinel" style="height:1px;"></div>
+  </div>
+</div>
+
+<!-- EXCLUSIVE -->
+<div id="view-exclusive" class="view grid-page" role="main" aria-label="Exclusive Videos">
+  <header class="page-header" id="exclusive-header">
+    <div class="header-brand" id="exclusive-brand-btn" role="button" tabindex="0" aria-label="Home">
+      <svg id="logo-exclusive" viewBox="0 0 60 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+      <span class="header-brand-name">Moothi</span>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" type="search" id="exclusive-search" placeholder="Search exclusive…" aria-label="Search exclusive videos" autocomplete="off" />
+    </div>
+  </header>
+
+  <div class="page-scroll" id="exclusive-scroll">
+    <div class="ptr-indicator" id="exclusive-ptr" aria-hidden="true"></div>
+
+    <h2 class="page-title" id="exclusive-page-title">My Spicy Contents</h2>
+
+    <!-- Info card -->
+    <div class="info-card" id="exclusive-info-card" aria-label="Watch progress">
+      <div class="info-card-row">
+        <span class="info-card-stat">Today's Videos Watched: <strong id="watched-count-display">0</strong></span>
+      </div>
+      <div class="progress-bar-wrap" role="progressbar" aria-label="Watch progress">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <button class="info-card-btn" id="info-card-free-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Watch Free Videos
+      </button>
+    </div>
+
+    <div class="post-grid" id="exclusive-grid" role="list" aria-label="Exclusive videos grid"></div>
+    <div id="exclusive-sentinel" style="height:1px;"></div>
+  </div>
+</div>
+
+<!-- SINGLE POST -->
+<div id="view-post" class="view" role="main" aria-label="Single Post">
+  <header class="page-header" id="post-header">
+    <div class="header-brand" id="post-brand-btn" role="button" tabindex="0" aria-label="Home">
+      <svg id="logo-post" viewBox="0 0 60 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+      <span class="header-brand-name">Moothi</span>
+    </div>
+  </header>
+
+  <div class="page-scroll" id="post-scroll">
+    <div class="post-hero" id="post-hero">
+      <img class="post-hero-img" id="post-hero-img" src="" alt="" loading="lazy" />
+      <div class="post-hero-gradient"></div>
+      <h1 class="post-hero-title" id="post-hero-title"></h1>
+    </div>
+
+    <div class="post-actions">
+      <button class="btn-watch-ad" id="btn-watch-ad">
+        ▶ Watch Video
+      </button>
+      <button class="btn-watch-video" id="btn-watch-video" disabled>
+        Watch Content
+      </button>
+    </div>
+
+    <div class="timer-indicator" id="timer-indicator" role="status" aria-live="polite">
+      <svg class="timer-ring" viewBox="0 0 36 36" aria-hidden="true">
+        <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(212,0,108,0.2)" stroke-width="3"/>
+        <circle id="timer-arc" cx="18" cy="18" r="15.9" fill="none" stroke="#d4006c" stroke-width="3"
+          stroke-dasharray="100 100" stroke-dashoffset="100" stroke-linecap="round"
+          transform="rotate(-90 18 18)"/>
+      </svg>
+      <span id="timer-text">Watching… <span id="timer-seconds">0</span>s / 10s</span>
+    </div>
+
+    <div class="share-row">
+      <button class="share-btn" id="btn-share" aria-label="Share post">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+      <button class="share-btn" id="btn-copy" aria-label="Copy link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Link
+      </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="related-section">
+      <p class="related-title">Related Reels</p>
+      <div class="related-scroll" id="related-scroll" role="list" aria-label="Related videos"></div>
+    </div>
+
+    <div class="post-nav">
+      <button class="post-nav-btn" id="btn-prev" aria-label="Previous post">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><path d="M15 18l-6-6 6-6"/></svg>
+        Previous
+      </button>
+      <button class="post-nav-btn" id="btn-next" aria-label="Next post">
+        Next
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Ad layer (isolated) -->
+<div id="ad-layer"></div>
+
+<!-- Toast -->
+<div id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  MOOTHI SPA — CORE APPLICATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+'use strict';
+
+// ─── SVG LOGO MARKUP ────────────────────────────────────────────────────────
+const LOGO_SVG_INNER = `
+  <!-- Stick (cylinder top wider) -->
+  <rect x="24" y="22" width="12" height="26" rx="5" fill="#111"/>
+  <ellipse cx="30" cy="22" rx="8" ry="4" fill="#1a1a1a"/>
+  <ellipse cx="30" cy="48" rx="6" ry="3" fill="#0d0d0d"/>
+  <!-- Fist body (Skin color) -->
+  <rect x="14" y="36" width="32" height="26" rx="8" fill="#d2996c"/>
+  <!-- Finger knuckle rows (Darker skin color) -->
+  <rect x="14" y="36" width="32" height="10" rx="5" fill="#b87a50"/>
+  <!-- Thumb (Skin color) -->
+  <ellipse cx="14" cy="46" rx="5" ry="8" fill="#d2996c"/>
+  <!-- White liquid drops -->
+  <ellipse cx="26" cy="10" rx="3.5" ry="5.5" fill="white" opacity="0.92"/>
+  <ellipse cx="30" cy="6" rx="2.5" ry="4.5" fill="white" opacity="0.78"/>
+  <ellipse cx="34" cy="10" rx="3" ry="5" fill="white" opacity="0.85"/>
+  <!-- Drop shine -->
+  <ellipse cx="25.2" cy="8" rx="1" ry="2" fill="white" opacity="0.5"/>
+`;
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const state = {
+  data: null,               // cached JSON
+  currentPage: null,        // 'landing' | 'free' | 'exclusive' | 'post'
+  currentPostId: null,
+  currentPostType: null,    // 'free' | 'exclusive'
+  freeOffset: 0,
+  exclusiveOffset: 0,
+  PAGE_SIZE: 10,
+  freeAllLoaded: false,
+  exclusiveAllLoaded: false,
+  freeFiltered: null,
+  exclusiveFiltered: null,
+  adTimer: null,
+  adStartTime: null,
+  adUnlocked: false,
+  visibilityHandler: null,
+  iObservers: {},           // intersection observers
+  ptrActive: false,
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const qs = sel => document.querySelector(sel);
+
+let toastTimer = null;
+function showToast(msg, type = 'info', duration = 3500) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = `toast-${type}`;
+  void el.offsetWidth; // reflow
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function formatDate(d) {
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+// ─── LOCAL STORAGE: WATCH COUNT ──────────────────────────────────────────────
+function getTodayWatched() {
+  try {
+    const raw = localStorage.getItem('moothi_watched');
+    if (!raw) return 0;
+    const obj = JSON.parse(raw);
+    const today = formatDate(new Date());
+    return obj.date === today ? (obj.count || 0) : 0;
+  } catch { return 0; }
+}
+
+function incrementWatched() {
+  try {
+    const today = formatDate(new Date());
+    const count = getTodayWatched() + 1;
+    localStorage.setItem('moothi_watched', JSON.stringify({ date: today, count }));
+    scheduleAutoReset();
+  } catch {}
+}
+
+let autoResetTimer = null;
+function scheduleAutoReset() {
+  clearTimeout(autoResetTimer);
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const msUntilMidnight = midnight - now;
+  autoResetTimer = setTimeout(() => {
+    try { localStorage.removeItem('moothi_watched'); } catch {}
+    updateExclusiveInfoCard();
+  }, msUntilMidnight);
+}
+
+// ─── DATA FETCH ──────────────────────────────────────────────────────────────
+const DATA_URL = 'https://raw.githubusercontent.com/nehu25/muthi/refs/heads/main/data.json';
+
+async function fetchData(force = false) {
+  if (state.data && !force) return state.data;
+  try {
+    const res = await fetch(DATA_URL, { cache: force ? 'reload' : 'force-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.data = await res.json();
+    // Sort newest first (by array order, reversed)
+    if (Array.isArray(state.data.freeVideos)) {
+      state.data.freeVideos = [...state.data.freeVideos].reverse();
+    }
+    if (Array.isArray(state.data.exclusiveVideos)) {
+      state.data.exclusiveVideos = [...state.data.exclusiveVideos].reverse();
+    }
+    return state.data;
+  } catch (e) {
+    console.warn('Fetch error:', e);
+    throw e;
+  }
+}
+
+// ─── SVG LOGOS ───────────────────────────────────────────────────────────────
+function injectLogos() {
+  ['logo-free', 'logo-exclusive', 'logo-post'].forEach(id => {
+    const el = $(id);
+    if (el) el.innerHTML = LOGO_SVG_INNER;
+  });
+}
+
+// ─── AD MANAGEMENT ───────────────────────────────────────────────────────────
+let adsLoaded = false;
+
+function injectAds(settings) {
+  if (adsLoaded) return;
+  adsLoaded = true;
+  const layer = $('ad-layer');
+
+  // Social Bar
+  if (settings.adsterraSocialBarScript) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = settings.adsterraSocialBarScript;
+    Array.from(tmp.childNodes).forEach(node => {
+      if (node.tagName === 'SCRIPT') {
+        const s = document.createElement('script');
+        s.src = node.src || '';
+        s.async = true;
+        s.setAttribute('data-adsterra', '1');
+        layer.appendChild(s);
+      }
+    });
+  }
+
+  // Sticky Footer
+  if (settings.adsterraStickyFooterScript) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = settings.adsterraStickyFooterScript;
+    Array.from(tmp.childNodes).forEach(node => {
+      if (node.tagName === 'SCRIPT') {
+        const s = document.createElement('script');
+        if (node.src) s.src = node.src;
+        else s.textContent = node.textContent;
+        s.setAttribute('data-adsterra', '1');
+        layer.appendChild(s);
+      }
+    });
+  }
+}
+
+function cleanupAds() {
+  // 1. Hide ad-layer
+  const layer = $('ad-layer');
+  if (layer) {
+    layer.style.display = 'none';
+    layer.innerHTML = '';
+  }
+  adsLoaded = false;
+
+  // 2. Forcefully remove any Adsterra iframes injected into body
+  const selectors = [
+    'iframe[src*="abackmentor"]',
+    'iframe[id*="adsterra"]',
+    'iframe[id*="abt"]',
+    'div[id*="adsterra"]',
+    'div[class*="adsterra"]',
+    '[data-adsterra]',
+    'script[src*="abackmentor"]',
+    '#social-bar-container',
+    '.social-bar',
+    '#sticky-footer',
+    '.sticky-footer-ad',
+  ];
+  selectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      try { el.remove(); } catch {}
+    });
+  });
+
+  // 3. Walk all iframes and hide suspicious ones
+  document.querySelectorAll('iframe').forEach(iframe => {
+    try {
+      const src = iframe.src || '';
+      if (src.includes('abackmentor') || src.includes('adsterra') || !src) {
+        iframe.style.display = 'none';
+        iframe.remove();
+      }
+    } catch {}
+  });
+
+  // 4. Remove any fixed/absolute positioned divs injected by ad scripts
+  document.querySelectorAll('body > div:not([id])').forEach(div => {
+    const style = window.getComputedStyle(div);
+    if (style.position === 'fixed' || style.position === 'absolute') {
+      div.style.display = 'none';
+    }
+  });
+}
+
+function showAdLayer() {
+  const layer = $('ad-layer');
+  if (layer) layer.style.display = '';
+}
+
+// ─── ROUTER ──────────────────────────────────────────────────────────────────
+function getRoute() {
+  const p = new URLSearchParams(location.search);
+  const page = p.get('page') || '';
+  const id = p.get('id') || '';
+  const type = p.get('type') || 'free';
+  if (!page) return { name: 'landing' };
+  if (page === 'free') return { name: 'free' };
+  if (page === 'exclusive') return { name: 'exclusive' };
+  if (page === 'post') return { name: 'post', id, type };
+  return { name: 'landing' };
+}
+
+function navigate(route, push = true) {
+  let url = '/';
+  if (route.name === 'free') url = '?page=free';
+  else if (route.name === 'exclusive') url = '?page=exclusive';
+  else if (route.name === 'post') url = `?page=post&id=${route.id}&type=${route.type || 'free'}`;
+
+  if (push) history.pushState({ route }, '', url);
+  renderRoute(route);
+}
+
+window.addEventListener('popstate', e => {
+  const route = getRoute();
+  renderRoute(route);
+});
+
+function renderRoute(route) {
+  // Hide all views
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  resetAdTimer();
+
+  switch (route.name) {
+    case 'landing':
+      cleanupAds();
+      showView('view-landing');
+      updateDocTitle('Moothi');
+      break;
+    case 'free':
+      showAdLayer();
+      showView('view-free');
+      loadFreeGrid(false);
+      if (state.data) injectAds(state.data.settings);
+      updateDocTitle('Free Videos — Moothi');
+      break;
+    case 'exclusive':
+      showAdLayer();
+      showView('view-exclusive');
+      loadExclusiveGrid(false);
+      updateExclusiveInfoCard();
+      if (state.data) injectAds(state.data.settings);
+      updateDocTitle('Exclusive Content — Moothi');
+      break;
+    case 'post':
+      showView('view-post');
+      loadPost(route.id, route.type);
+      updateDocTitle('Video — Moothi');
+      break;
+    default:
+      cleanupAds();
+      showView('view-landing');
+  }
+}
+
+function showView(id) {
+  const el = $(id);
+  if (el) {
+    el.classList.add('active');
+    // Scroll to top
+    const scroll = el.querySelector('.page-scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
+}
+
+function updateDocTitle(title) {
+  document.title = title;
+}
+
+// ─── LANDING PAGE ────────────────────────────────────────────────────────────
+function initLanding(settings) {
+  const imgUrl = settings?.landingCharacterImage;
+  const imgEl = $('landing-character');
+  const placeholder = $('landing-character-placeholder');
+
+  if (imgUrl && imgEl) {
+    imgEl.src = imgUrl;
+    imgEl.alt = settings.websiteName || 'Moothi character';
+    imgEl.onload = () => imgEl.classList.add('loaded');
+    imgEl.onerror = () => { imgEl.style.display = 'none'; };
+    placeholder.style.display = 'none';
+  } else if (imgEl) {
+    imgEl.style.display = 'none';
+  }
+}
+
+// ─── SKELETON ────────────────────────────────────────────────────────────────
+function renderSkeletons(container, count = 6) {
+  container.innerHTML = Array(count).fill(0).map(() => `
+    <div class="post-card" aria-hidden="true" style="pointer-events:none;">
+      <div class="skeleton skeleton-thumb"></div>
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-title2"></div>
+    </div>
+  `).join('');
+}
+
+// ─── LAZY IMAGE LOADER ───────────────────────────────────────────────────────
+let imgObserver = null;
+function getLazyObserver() {
+  if (!imgObserver) {
+    imgObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          const src = img.dataset.src;
+          if (src) {
+            img.src = src;
+            img.removeAttribute('data-src');
+            img.addEventListener('load', () => img.classList.add('img-loaded'), { once: true });
+            img.addEventListener('error', () => {
+              img.style.display = 'none';
+            }, { once: true });
+          }
+          imgObserver.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px' });
+  }
+  return imgObserver;
+}
+
+// ─── POST CARD ───────────────────────────────────────────────────────────────
+function createPostCard(post, index, type = 'free', watched = 0) {
+  const required = post.requiredVideosToday ?? (state.data?.settings?.defaultRequiredVideosCount ?? 3);
+  const isExclusive = type === 'exclusive';
+  const isLocked = isExclusive && watched < required;
+  const remaining = Math.max(0, required - watched);
+
+  const card = document.createElement('article');
+  card.className = 'post-card';
+  card.setAttribute('role', 'listitem');
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('aria-label', post.title || 'Video');
+
+  const thumbHtml = post.thumbnailUrl
+    ? `<img class="post-thumb" data-src="${escHtml(post.thumbnailUrl)}" alt="${escHtml(post.title || '')}" loading="lazy" />`
+    : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#1a001a,#00001a);"></div>`;
+
+  const lockHtml = isLocked ? `
+    <div class="lock-overlay" aria-label="Locked content">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <p class="lock-msg">Watch ${remaining} more free video${remaining !== 1 ? 's' : ''} today to unlock</p>
+    </div>
+  ` : '';
+
+  card.innerHTML = `
+    <div class="post-thumb-wrap">
+      ${thumbHtml}
+      ${lockHtml}
+    </div>
+    <p class="post-title">${escHtml(post.title || 'Untitled')}</p>
+  `;
+
+  // Lazy load image
+  const img = card.querySelector('.post-thumb');
+  if (img) getLazyObserver().observe(img);
+
+  // Click handler
+  if (!isLocked) {
+    card.addEventListener('click', () => {
+      navigate({ name: 'post', id: post.id, type });
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navigate({ name: 'post', id: post.id, type });
+      }
+    });
+  } else {
+    card.style.cursor = 'default';
+  }
+
+  return card;
+}
+
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── FREE GRID ───────────────────────────────────────────────────────────────
+let freeInfiniteObserver = null;
+let freeSearchTimer = null;
+
+function loadFreeGrid(reset = true) {
+  if (!state.data) return;
+  const grid = $('free-grid');
+  if (!grid) return;
+
+  if (reset) {
+    state.freeOffset = 0;
+    state.freeAllLoaded = false;
+    state.freeFiltered = null;
+    grid.innerHTML = '';
+    renderSkeletons(grid, 6);
+    setTimeout(() => renderFreeChunk(true), 150);
+  } else {
+    renderFreeChunk(true);
+  }
+
+  setupFreeInfiniteScroll();
+}
+
+function getFreeList() {
+  const raw = state.data?.freeVideos || [];
+  if (state.freeFiltered !== null) return state.freeFiltered;
+  return raw;
+}
+
+function renderFreeChunk(clear = false) {
+  const grid = $('free-grid');
+  if (!grid) return;
+  if (clear) { grid.innerHTML = ''; state.freeOffset = 0; }
+
+  const list = getFreeList();
+  const chunk = list.slice(state.freeOffset, state.freeOffset + state.PAGE_SIZE);
+
+  if (chunk.length === 0 && state.freeOffset === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="10 9 10 15 14 12"/></svg>
+        <p>No videos found</p>
+      </div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  chunk.forEach((post, i) => frag.appendChild(createPostCard(post, state.freeOffset + i, 'free', 0)));
+  grid.appendChild(frag);
+  state.freeOffset += chunk.length;
+
+  if (state.freeOffset >= list.length) state.freeAllLoaded = true;
+}
+
+function setupFreeInfiniteScroll() {
+  if (freeInfiniteObserver) freeInfiniteObserver.disconnect();
+  const sentinel = $('free-sentinel');
+  if (!sentinel) return;
+  freeInfiniteObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !state.freeAllLoaded) {
+      renderFreeChunk(false);
+    }
+  }, { rootMargin: '300px' });
+  freeInfiniteObserver.observe(sentinel);
+}
+
+// ─── EXCLUSIVE GRID ──────────────────────────────────────────────────────────
+let exclusiveInfiniteObserver = null;
+
+function loadExclusiveGrid(reset = true) {
+  if (!state.data) return;
+  const grid = $('exclusive-grid');
+  if (!grid) return;
+
+  if (reset) {
+    state.exclusiveOffset = 0;
+    state.exclusiveAllLoaded = false;
+    state.exclusiveFiltered = null;
+    grid.innerHTML = '';
+    renderSkeletons(grid, 6);
+    setTimeout(() => renderExclusiveChunk(true), 150);
+  } else {
+    renderExclusiveChunk(true);
+  }
+
+  setupExclusiveInfiniteScroll();
+}
+
+function getExclusiveList() {
+  const raw = state.data?.exclusiveVideos || [];
+  if (state.exclusiveFiltered !== null) return state.exclusiveFiltered;
+  return raw;
+}
+
+function renderExclusiveChunk(clear = false) {
+  const grid = $('exclusive-grid');
+  if (!grid) return;
+  if (clear) { grid.innerHTML = ''; state.exclusiveOffset = 0; }
+
+  const list = getExclusiveList();
+  const watched = getTodayWatched();
+  const chunk = list.slice(state.exclusiveOffset, state.exclusiveOffset + state.PAGE_SIZE);
+
+  if (chunk.length === 0 && state.exclusiveOffset === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <p>No exclusive content yet</p>
+      </div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  chunk.forEach((post, i) => frag.appendChild(createPostCard(post, state.exclusiveOffset + i, 'exclusive', watched)));
+  grid.appendChild(frag);
+  state.exclusiveOffset += chunk.length;
+
+  if (state.exclusiveOffset >= list.length) state.exclusiveAllLoaded = true;
+}
+
+function setupExclusiveInfiniteScroll() {
+  if (exclusiveInfiniteObserver) exclusiveInfiniteObserver.disconnect();
+  const sentinel = $('exclusive-sentinel');
+  if (!sentinel) return;
+  exclusiveInfiniteObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !state.exclusiveAllLoaded) {
+      renderExclusiveChunk(false);
+    }
+  }, { rootMargin: '300px' });
+  exclusiveInfiniteObserver.observe(sentinel);
+}
+
+function updateExclusiveInfoCard() {
+  const watched = getTodayWatched();
+  const required = state.data?.settings?.defaultRequiredVideosCount ?? 3;
+  const pct = Math.min(100, Math.round((watched / required) * 100));
+
+  const display = $('watched-count-display');
+  const fill = $('progress-fill');
+  const title = $('exclusive-page-title');
+
+  if (display) display.textContent = watched;
+  if (fill) fill.style.width = pct + '%';
+  if (title && state.data?.settings?.exclusivePageTitle) {
+    title.textContent = state.data.settings.exclusivePageTitle;
+  }
+}
+
+// ─── SEARCH ──────────────────────────────────────────────────────────────────
+function setupSearch() {
+  const freeInput = $('free-search');
+  const exclusiveInput = $('exclusive-search');
+
+  if (freeInput) {
+    freeInput.addEventListener('input', () => {
+      clearTimeout(freeSearchTimer);
+      freeSearchTimer = setTimeout(() => {
+        const q = freeInput.value.trim().toLowerCase();
+        const raw = state.data?.freeVideos || [];
+        state.freeFiltered = q ? raw.filter(p => (p.title || '').toLowerCase().includes(q)) : null;
+        renderFreeChunk(true);
+        setupFreeInfiniteScroll();
+      }, 280);
+    });
+  }
+
+  if (exclusiveInput) {
+    exclusiveInput.addEventListener('input', () => {
+      clearTimeout(freeSearchTimer);
+      freeSearchTimer = setTimeout(() => {
+        const q = exclusiveInput.value.trim().toLowerCase();
+        const raw = state.data?.exclusiveVideos || [];
+        state.exclusiveFiltered = q ? raw.filter(p => (p.title || '').toLowerCase().includes(q)) : null;
+        renderExclusiveChunk(true);
+        setupExclusiveInfiniteScroll();
+      }, 280);
+    });
+  }
+}
+
+// ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
+function setupPullToRefresh(scrollEl, ptrEl, onRefresh) {
+  if (!scrollEl || !ptrEl) return;
+  let startY = 0;
+  let pulling = false;
+
+  scrollEl.addEventListener('touchstart', e => {
+    if (scrollEl.scrollTop === 0) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+    }
+  }, { passive: true });
+
+  scrollEl.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    const delta = e.touches[0].clientY - startY;
+    if (delta > 60) {
+      ptrEl.classList.add('ptr-visible');
+    }
+  }, { passive: true });
+
+  scrollEl.addEventListener('touchend', async e => {
+    if (!pulling) return;
+    pulling = false;
+    if (ptrEl.classList.contains('ptr-visible')) {
+      ptrEl.classList.remove('ptr-visible');
+      await onRefresh();
+    }
+  }, { passive: true });
+}
+
+// ─── SINGLE POST ─────────────────────────────────────────────────────────────
+function findPost(id, type) {
+  const list = type === 'exclusive'
+    ? (state.data?.exclusiveVideos || [])
+    : (state.data?.freeVideos || []);
+  return { post: list.find(p => p.id === id), list };
+}
+
+function loadPost(id, type) {
+  if (!state.data) return;
+  const { post, list } = findPost(id, type);
+  if (!post) {
+    showToast('Post not found.', 'error');
+    navigate({ name: type === 'exclusive' ? 'exclusive' : 'free' });
+    return;
+  }
+
+  state.currentPostId = id;
+  state.currentPostType = type;
+  state.adUnlocked = false;
+
+  // Hero
+  const heroImg = $('post-hero-img');
+  const heroTitle = $('post-hero-title');
+  if (heroImg) {
+    heroImg.src = post.thumbnailUrl || '';
+    heroImg.alt = post.title || '';
+    heroImg.onerror = () => { heroImg.style.display = 'none'; };
+  }
+  if (heroTitle) heroTitle.textContent = post.title || 'Untitled';
+
+  // Buttons
+  const btnAd = $('btn-watch-ad');
+  const btnVideo = $('btn-watch-video');
+  if (btnAd) btnAd.disabled = false;
+  if (btnVideo) btnVideo.disabled = true;
+
+  // Timer
+  const timerEl = $('timer-indicator');
+  if (timerEl) timerEl.classList.remove('visible');
+
+  // Prev / Next
+  const idx = list.findIndex(p => p.id === id);
+  const btnPrev = $('btn-prev');
+  const btnNext = $('btn-next');
+  if (btnPrev) btnPrev.disabled = idx <= 0;
+  if (btnNext) btnNext.disabled = idx >= list.length - 1;
+
+  if (btnPrev) {
+    btnPrev.onclick = () => {
+      if (idx > 0) navigate({ name: 'post', id: list[idx - 1].id, type });
+    };
+  }
+  if (btnNext) {
+    btnNext.onclick = () => {
+      if (idx < list.length - 1) navigate({ name: 'post', id: list[idx + 1].id, type });
+    };
+  }
+
+  // Related reels (pick up to 5 others)
+  const related = list.filter(p => p.id !== id).slice(0, 6);
+  const relatedScroll = $('related-scroll');
+  if (relatedScroll) {
+    relatedScroll.innerHTML = '';
+    if (related.length === 0) {
+      relatedScroll.innerHTML = '<p style="padding:0 4px;color:#555;font-size:0.8rem;">No related videos</p>';
+    } else {
+      related.forEach(rp => {
+        const card = document.createElement('div');
+        card.className = 'related-card';
+        card.setAttribute('role', 'listitem');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', rp.title || 'Related video');
+        const thumbSrc = rp.thumbnailUrl || '';
+        card.innerHTML = `
+          <div class="post-thumb-wrap" style="border-radius:10px;">
+            <img class="post-thumb" data-src="${escHtml(thumbSrc)}" alt="${escHtml(rp.title || '')}" loading="lazy"/>
+          </div>
+          <p class="post-title">${escHtml(rp.title || 'Untitled')}</p>
+        `;
+        const img = card.querySelector('.post-thumb');
+        if (img) getLazyObserver().observe(img);
+        card.addEventListener('click', () => navigate({ name: 'post', id: rp.id, type }));
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate({ name: 'post', id: rp.id, type }); }
+        });
+        relatedScroll.appendChild(card);
+      });
+    }
+  }
+
+  // Share
+  const shareBtn = $('btn-share');
+  const copyBtn = $('btn-copy');
+  const postUrl = location.origin + location.pathname + `?page=post&id=${id}&type=${type}`;
+
+  if (shareBtn) {
+    shareBtn.onclick = async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: post.title || 'Moothi', url: postUrl });
+        } catch {}
+      } else {
+        copyToClipboard(postUrl);
+      }
+    };
+  }
+  if (copyBtn) {
+    copyBtn.onclick = () => copyToClipboard(postUrl);
+  }
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('Link copied!', 'success')).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); showToast('Link copied!', 'success'); } catch {}
+  ta.remove();
+}
+
+// ─── AD TIMER LOGIC ──────────────────────────────────────────────────────────
+function resetAdTimer() {
+  clearInterval(state.adTimer);
+  state.adTimer = null;
+  state.adStartTime = null;
+  state.adUnlocked = false;
+  if (state.visibilityHandler) {
+    document.removeEventListener('visibilitychange', state.visibilityHandler);
+    state.visibilityHandler = null;
+  }
+  const timerEl = $('timer-indicator');
+  if (timerEl) timerEl.classList.remove('visible');
+}
+
+function startAdTimer(post) {
+  resetAdTimer();
+
+  const timerEl = $('timer-indicator');
+  const timerText = $('timer-seconds');
+  const arc = $('timer-arc');
+  const btnVideo = $('btn-watch-video');
+  const REQUIRED = 10; // seconds
+
+  // Timestamp when user left (went to ad tab)
+  let awayStart = null;
+  let totalAwayTime = 0; // ms spent on ad tab
+  let unlocked = false;
+
+  if (timerEl) timerEl.classList.add('visible');
+
+  function updateUI(secs) {
+    const s = Math.min(REQUIRED, Math.floor(secs));
+    if (timerText) timerText.textContent = s;
+    if (arc) {
+      const pct = Math.min(100, (s / REQUIRED) * 100);
+      arc.setAttribute('stroke-dashoffset', 100 - pct);
+    }
+  }
+
+  // UI polling – updates display every second based on time away
+  state.adTimer = setInterval(() => {
+    if (awayStart !== null && !unlocked) {
+      const awayNow = totalAwayTime + (Date.now() - awayStart);
+      const secs = awayNow / 1000;
+      updateUI(secs);
+      if (secs >= REQUIRED) {
+        unlockContent();
+      }
+    }
+  }, 500);
+
+  function unlockContent() {
+    if (unlocked) return;
+    unlocked = true;
+    state.adUnlocked = true;
+    clearInterval(state.adTimer);
+    if (timerEl) timerEl.classList.remove('visible');
+    if (btnVideo) btnVideo.disabled = false;
+    showToast('🔓 Content unlocked! Tap "Watch Content" to view.', 'success', 4500);
+    document.removeEventListener('visibilitychange', state.visibilityHandler);
+  }
+
+  state.visibilityHandler = () => {
+    if (document.hidden) {
+      // User left our page → went to ad tab → start counting
+      awayStart = Date.now();
+    } else {
+      // User returned to our page
+      if (awayStart !== null) {
+        const sessionTime = Date.now() - awayStart;
+        totalAwayTime += sessionTime;
+        awayStart = null;
+
+        const secsAway = totalAwayTime / 1000;
+
+        if (!unlocked) {
+          if (secsAway >= REQUIRED) {
+            unlockContent();
+          } else {
+            const remaining = Math.ceil(REQUIRED - secsAway);
+            updateUI(secsAway);
+            showToast(`⏱ You must watch the video for at least 10 seconds to unlock. ${remaining}s remaining.`, 'error', 5000);
+          }
+        }
+      } else {
+        // Returned without having left (e.g. tab switch within same window)
+        if (!unlocked) {
+          showToast('⏱ Open the video in a new tab and watch for at least 10 seconds.', 'info', 4000);
+        }
+      }
+    }
+  };
+
+  document.addEventListener('visibilitychange', state.visibilityHandler);
+}
+
+// ─── PULL TO REFRESH ─────────────────────────────────────────────────────────
+async function refreshFree() {
+  state.data = null;
+  try {
+    await fetchData(true);
+    loadFreeGrid(true);
+    showToast('Refreshed!', 'success');
+  } catch {
+    showToast('Failed to refresh. Try again.', 'error');
+  }
+}
+
+async function refreshExclusive() {
+  state.data = null;
+  try {
+    await fetchData(true);
+    loadExclusiveGrid(true);
+    updateExclusiveInfoCard();
+    showToast('Refreshed!', 'success');
+  } catch {
+    showToast('Failed to refresh. Try again.', 'error');
+  }
+}
+
+// ─── EVENT LISTENERS ─────────────────────────────────────────────────────────
+function bindEvents() {
+  // Landing buttons
+  $('btn-free')?.addEventListener('click', () => navigate({ name: 'free' }));
+  $('btn-exclusive')?.addEventListener('click', () => navigate({ name: 'exclusive' }));
+
+  // Brand logo nav (This acts as the new home/back button)
+  ['free-brand-btn', 'exclusive-brand-btn', 'post-brand-btn'].forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.addEventListener('click', () => navigate({ name: 'landing' }));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate({ name: 'landing' }); }
+      });
+    }
+  });
+
+  // Info card free btn
+  $('info-card-free-btn')?.addEventListener('click', () => navigate({ name: 'free' }));
+
+  // Post: Watch Free Video
+  $('btn-watch-ad')?.addEventListener('click', () => {
+    if (!state.data) return;
+    const { post } = findPost(state.currentPostId, state.currentPostType);
+    if (!post) return;
+    if (post.adRedirectUrl) {
+      window.open(post.adRedirectUrl, '_blank', 'noopener');
+    }
+    startAdTimer(post);
+  });
+
+  // Post: Watch Content
+  $('btn-watch-video')?.addEventListener('click', () => {
+    if (!state.adUnlocked) return;
+    const { post } = findPost(state.currentPostId, state.currentPostType);
+    if (!post || !post.videoUrl) { showToast('Video not available.', 'error'); return; }
+    window.open(post.videoUrl, '_blank', 'noopener');
+    incrementWatched();
+    updateExclusiveInfoCard();
+    showToast('🎉 Enjoy the content!', 'success');
+  });
+
+  // Pull to refresh
+  setupPullToRefresh($('free-scroll'), $('free-ptr'), refreshFree);
+  setupPullToRefresh($('exclusive-scroll'), $('exclusive-ptr'), refreshExclusive);
+}
+
+// ─── APP INIT ─────────────────────────────────────────────────────────────────
+async function init() {
+  // Inject logos
+  injectLogos();
+
+  // Bind events
+  bindEvents();
+
+  // Setup search
+  setupSearch();
+
+  // Schedule midnight reset
+  scheduleAutoReset();
+
+  // Load data
+  try {
+    await fetchData();
+  } catch {
+    showToast('Failed to load data. Please refresh.', 'error', 6000);
+  }
+
+  // Apply settings
+  if (state.data?.settings) {
+    const s = state.data.settings;
+    if (s.browserTitle) document.title = s.browserTitle;
+    if (s.websiteName) {
+      document.querySelectorAll('.header-brand-name').forEach(el => el.textContent = s.websiteName);
+      $('landing-brand').textContent = s.websiteName;
+    }
+    if (s.faviconUrl) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+      link.href = s.faviconUrl;
+    }
+  }
+
+  initLanding(state.data?.settings);
+
+  // Route init
+  const route = getRoute();
+  renderRoute(route);
+}
+
+// ─── SERVICE WORKER ──────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Inline SW via blob
+    const swCode = `
+      const CACHE = 'moothi-v1';
+      const STATIC = ['/'];
+      self.addEventListener('install', e => {
+        e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)).then(() => self.skipWaiting()));
+      });
+      self.addEventListener('activate', e => {
+        e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+      });
+      self.addEventListener('fetch', e => {
+        if (e.request.method !== 'GET') return;
+        const url = new URL(e.request.url);
+        // Cache JSON
+        if (url.hostname === 'raw.githubusercontent.com') {
+          e.respondWith(
+            caches.open(CACHE).then(async cache => {
+              const cached = await cache.match(e.request);
+              const fetchP = fetch(e.request).then(r => { cache.put(e.request, r.clone()); return r; }).catch(() => cached);
+              return cached || fetchP;
+            })
+          );
+          return;
+        }
+        e.respondWith(
+          caches.match(e.request).then(r => r || fetch(e.request))
+        );
+      });
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  });
+}
+
+// ─── START ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
