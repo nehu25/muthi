@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Moothi</title>
 
+  <!-- Preconnect to GitHub to speed up the JSON & Image fetching instantly -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
+
   <!-- SEO -->
   <meta name="description" content="Moothi – Watch free and exclusive video content." />
   <meta name="theme-color" content="#90003a" />
@@ -128,10 +131,8 @@
       object-position: bottom center;
       z-index: 2;
       pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.6s ease;
+      /* Removed opacity delay to instantly display the image once downloaded */
     }
-    #landing-character.loaded { opacity: 1; }
 
     #landing-character-placeholder {
       position: absolute;
@@ -163,13 +164,18 @@
 
     /* RESPONSIVE: LAPTOP & TABLET */
     @media (min-width: 768px) {
-      #view-landing {
+      /* Added .active to prevent desktop flex from overriding display:none */
+      #view-landing.active {
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
         gap: 8vw;
         padding: 0 5vw;
+      }
+      
+      #view-landing:not(.active) {
+        display: none !important;
       }
       
       #landing-character {
@@ -803,7 +809,7 @@
   <span id="landing-brand">Moothi</span>
 
   <div id="landing-character-placeholder" aria-hidden="true"></div>
-  <img id="landing-character" src="" alt="" aria-hidden="true" loading="eager" />
+  <img id="landing-character" src="" alt="" aria-hidden="true" fetchpriority="high" />
 
   <div id="landing-buttons" role="navigation" aria-label="Main Navigation">
     <button class="landing-btn" id="btn-free" aria-label="Watch Free Videos">
@@ -951,6 +957,12 @@
 
 'use strict';
 
+// ─── START DATA FETCH IMMEDIATELY (Reduces 5-8s wait time on slow internet) ──
+const DATA_URL = 'https://raw.githubusercontent.com/nehu25/muthi/refs/heads/main/data.json';
+const initialDataFetch = fetch(DATA_URL, { cache: 'force-cache' })
+  .then(res => res.ok ? res.json() : null)
+  .catch(() => null);
+
 // ─── SVG LOGO MARKUP ────────────────────────────────────────────────────────
 const LOGO_SVG_INNER = `
   <!-- Stick (Tanned skin color) -->
@@ -1050,14 +1062,22 @@ function scheduleAutoReset() {
 }
 
 // ─── DATA FETCH ──────────────────────────────────────────────────────────────
-const DATA_URL = 'https://raw.githubusercontent.com/nehu25/muthi/refs/heads/main/data.json';
-
 async function fetchData(force = false) {
   if (state.data && !force) return state.data;
   try {
-    const res = await fetch(DATA_URL, { cache: force ? 'reload' : 'force-cache' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    state.data = await res.json();
+    let rawData;
+    // Use the extremely fast pre-fetched data if available and we aren't forcing a refresh
+    if (!force && initialDataFetch) {
+      rawData = await initialDataFetch;
+    } else {
+      const res = await fetch(DATA_URL, { cache: force ? 'reload' : 'force-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      rawData = await res.json();
+    }
+    
+    if (!rawData) throw new Error("No data fetched");
+    state.data = rawData;
+    
     // Sort newest first (by array order, reversed)
     if (Array.isArray(state.data.freeVideos)) {
       state.data.freeVideos = [...state.data.freeVideos].reverse();
@@ -1261,7 +1281,6 @@ function initLanding(settings) {
   if (imgUrl && imgEl) {
     imgEl.src = imgUrl;
     imgEl.alt = settings.websiteName || 'Moothi character';
-    imgEl.onload = () => imgEl.classList.add('loaded');
     imgEl.onerror = () => { imgEl.style.display = 'none'; };
     placeholder.style.display = 'none';
   } else if (imgEl) {
