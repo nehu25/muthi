@@ -2,7 +2,7 @@
   "settings": {
     "websiteName": "Moothi",
     "browserTitle": "Moothi",
-    "landingCharacterImage": "",
+    "landingCharacterImage": "https://res.cloudinary.com/whnk39lp/image/upload/v1783755905/file_00000000baec71fb95d7e31dc59082e6_v4onwr.png",
     "logoUrl": "",
     "faviconUrl": "",
     "landingButton1Text": "Watch Free Videos",
