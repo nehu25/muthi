@@ -1,5 +1,25 @@
 {
-  "settings": {},
-  "freeVideos": [],
+  "settings": {
+    "websiteName": "Moothi",
+    "browserTitle": "Moothi",
+    "landingCharacterImage": "",
+    "logoUrl": "",
+    "faviconUrl": "",
+    "landingButton1Text": "Watch Free Videos",
+    "landingButton2Text": "Watch My Exclusive Content",
+    "exclusivePageTitle": "My Spicy Contents",
+    "defaultRequiredVideosCount": 3,
+    "adsterraSocialBarScript": "<script src=\"https://abackmentor.com/b0/ca/ef/b0caefe7dd17d2bd1773c5bd44a11613.js\"></script>",
+    "adsterraStickyFooterScript": "<script>atOptions = {'key' : '0a1211cf9fe6a66f63b23945b8b3804e','format' : 'iframe','height' : 50,'width' : 320,'params' : {}};</script><script src=\"https://abackmentor.com/0a1211cf9fe6a66f63b23945b8b3804e/invoke.js\"></script>"
+  },
+  "freeVideos": [
+    {
+      "id": "0e33aed5-a2cf-4f8d-a8e5-fabd7ff6ad76",
+      "title": "post 28",
+      "thumbnailUrl": "https://onecompiler.com/html#draft-ffbp",
+      "adRedirectUrl": "https://onecompiler.com/html#draft-ffbp",
+      "videoUrl": "https://onecompiler.com/html#draft-ffbp"
+    }
+  ],
   "exclusiveVideos": []
 }
