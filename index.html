@@ -17,6 +17,7 @@
     }
 
     body {
+      /* Clean, modern Sans-Serif font for the whole page */
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--clr-bg);
       color: #f0f0f0;
@@ -55,32 +56,36 @@
       pointer-events: none; z-index: 1; opacity: 0.5;
     }
 
-    /* Gradient overlay to make text readable over the image on mobile */
+    /* Gradient overlay for mobile only */
     .mobile-gradient-overlay {
-      position: absolute; top: 0; left: 0; right: 0; height: 40vh;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      position: absolute; top: 0; left: 0; right: 0; height: 35vh;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%);
       z-index: 3; pointer-events: none;
     }
 
+    /* ─── BRAND NAME (Same font across all devices) ────────────────────────── */
     #landing-brand {
-      position: absolute; top: 20px; left: 22px;
-      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
-      font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 700; color: #fff;
-      letter-spacing: 1px; text-shadow: 0 2px 20px rgba(0,0,0,0.6); z-index: 10; user-select: none;
+      position: absolute; top: 24px; left: 24px;
+      font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 800; color: #fff;
+      letter-spacing: 0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 20; user-select: none;
     }
 
     /* ─── CHARACTER IMAGE (MOBILE FIRST) ───────────────────────────────────── */
     #landing-character {
       position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; height: 100vh; object-fit: cover; object-position: center 15%; /* Focused slightly higher */
+      width: 100%; height: 100vh; object-fit: cover; object-position: center 15%; 
       z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+    }
+
+    /* ─── CONTENT WRAPPER ──────────────────────────────────────────────────── */
+    #content-wrapper {
+      position: absolute; inset: 0; pointer-events: none; z-index: 10;
     }
 
     /* ─── TYPEWRITER TEXT (MOBILE FIRST - CENTERED) ────────────────────────── */
     #typewriter-container {
-      position: absolute; top: 85px; left: 16px; right: 16px; z-index: 10;
-      pointer-events: none; text-shadow: 0 2px 15px rgba(0,0,0,0.9);
-      text-align: center; /* Center aligned for mobile */
+      position: absolute; top: 12vh; left: 16px; right: 16px; 
+      text-shadow: 0 2px 15px rgba(0,0,0,0.9); text-align: center;
     }
     .type-line-1 { font-size: clamp(1.5rem, 6.5vw, 2.2rem); font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.25; }
     .type-line-2 { font-size: clamp(1rem, 4.5vw, 1.3rem); font-weight: 500; color: rgba(255, 255, 255, 0.9); line-height: 1.4; }
@@ -93,15 +98,8 @@
 
     /* ─── BUTTON (MOBILE FIRST - AROUND STOMACH AREA) ──────────────────────── */
     #landing-buttons {
-      position: absolute;
-      bottom: 22vh; /* Moved up to stomach area instead of bottom edge */
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
-      display: flex;
-      flex-direction: column;
-      width: min(340px, 88vw);
-      align-items: center;
+      position: absolute; bottom: 22vh; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; width: min(340px, 88vw); align-items: center; pointer-events: auto;
     }
 
     .landing-btn {
@@ -109,8 +107,7 @@
       border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px;
       cursor: pointer; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px;
       text-align: center; transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
-      background: rgba(212, 0, 108, 0.6); /* More opaque so it stands out over the image */
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      background: rgba(212, 0, 108, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       color: #fff; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent;
     }
@@ -119,28 +116,41 @@
 
     /* ─── RESPONSIVE DESKTOP/LAPTOP (SPLIT SCREEN VIEW) ────────────────────── */
     @media (min-width: 768px) {
-      /* Remove mobile gradient */
       .mobile-gradient-overlay { display: none; }
 
-      /* Image takes up the right half perfectly */
+      /* Image mapped perfectly to the right side */
       #landing-character { 
         left: auto; right: 0; bottom: 0; transform: none; 
-        height: 100vh; width: 50vw; max-width: 800px; 
+        height: 100vh; width: 55vw; max-width: 900px; 
         object-fit: cover; object-position: top center; 
       }
       
-      /* Text moves to the left half, left-aligned, centered vertically */
-      #typewriter-container { 
-        top: 45%; left: 8%; width: 40vw; 
-        transform: translateY(-50%); text-align: left; 
+      /* Grouping text and button to vertically center them on the left */
+      #content-wrapper {
+        position: absolute; top: 50%; left: 8%; width: 42vw; max-width: 600px; 
+        transform: translateY(-50%); height: auto; bottom: auto;
+        display: flex; flex-direction: column; justify-content: center; pointer-events: auto;
       }
-      .type-line-1 { font-size: clamp(2.2rem, 4vw, 3.5rem); }
-      .type-line-2 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
 
-      /* Button stays on the left half, directly below the text */
+      /* Formatting Desktop Text */
+      #typewriter-container { 
+        position: relative; top: auto; left: auto; right: auto;
+        text-align: left; 
+      }
+      .type-line-1 { font-size: clamp(2.5rem, 4vw, 3.8rem); margin-bottom: 16px; line-height: 1.1; }
+      .type-line-2 { font-size: clamp(1.2rem, 1.8vw, 1.5rem); margin-bottom: 36px; /* Great spacing before button */ }
+
+      /* Formatting Desktop Button */
       #landing-buttons { 
-        left: 8%; bottom: auto; top: 62%; 
-        transform: none; width: 340px; 
+        position: relative; bottom: auto; left: auto; transform: none; 
+        width: auto; align-items: flex-start;
+      }
+      .landing-btn {
+        width: auto; /* Adapts to text length */
+        min-width: 260px;
+        padding: 16px 36px;
+        border-radius: 12px;
+        font-size: 1.15rem;
       }
     }
   </style>
@@ -156,28 +166,30 @@
 <div id="view-landing">
   <span id="landing-brand">Moothi</span>
   
-  <!-- Gradient for mobile to ensure text pops -->
   <div class="mobile-gradient-overlay"></div>
 
-  <!-- TYPEWRITER TEXT -->
-  <div id="typewriter-container">
-    <div class="type-line-1">
-      <span id="text-part-1"></span><span class="cursor" id="cursor-1"></span>
+  <!-- TEXT & BUTTON WRAPPER -->
+  <div id="content-wrapper">
+    <!-- TYPEWRITER TEXT -->
+    <div id="typewriter-container">
+      <div class="type-line-1">
+        <span id="text-part-1"></span><span class="cursor" id="cursor-1"></span>
+      </div>
+      <div class="type-line-2">
+        <span id="text-part-2"></span><span class="cursor" id="cursor-2" style="display: none;"></span>
+      </div>
     </div>
-    <div class="type-line-2">
-      <span id="text-part-2"></span><span class="cursor" id="cursor-2" style="display: none;"></span>
+    
+    <!-- REDIRECT BUTTON -->
+    <div id="landing-buttons">
+      <button class="landing-btn" onclick="window.location.href='YOUR_REDIRECT_LINK_HERE'">
+        Watch all videos for free
+      </button>
     </div>
   </div>
-  
+
   <!-- BACKGROUND CHARACTER IMAGE -->
   <img id="landing-character" src="" alt="Character" />
-
-  <!-- REDIRECT BUTTON -->
-  <div id="landing-buttons">
-    <button class="landing-btn" onclick="window.location.href='YOUR_REDIRECT_LINK_HERE'">
-      Watch all videos for free
-    </button>
-  </div>
 </div>
 
 <script>
