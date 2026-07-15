@@ -9,8 +9,8 @@
     "landingButton2Text": "Watch My Spicy Content",
     "exclusivePageTitle": "Free Exclusive Contents",
     "defaultRequiredVideosCount": 3,
-    "adsterraSocialBarScript": "<script src=\"https://abackmentor.com/f4/98/8b/f4988b81983eb8a8516a396e9253a95f.js\"></script>",
-    "adsterraStickyFooterScript": "<script>\n  atOptions = {\n    'key' : '71f7ea54db77044a59f7fc818e2a98a9',\n    'format' : 'iframe',\n    'height' : 50,\n    'width' : 320,\n    'params' : {}\n  };\n</script>\n<script src=\"https://abackmentor.com/71f7ea54db77044a59f7fc818e2a98a9/invoke.js\"></script>"
+    "adsterraSocialBarScript": "",
+    "adsterraStickyFooterScript": ""
   },
   "freeVideos": [
     {
